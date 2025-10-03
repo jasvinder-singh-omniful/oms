@@ -1,0 +1,51 @@
+env: "local"
+
+http_server: 
+  host: "localhost"
+  port: "3000"
+  read_timeout: "10s"
+  write_timeout: "10s" 
+  idle_timeout: "60s"
+
+postgres:
+  master:
+    host: "localhost"
+    port: "5432"
+    user: "postgres"
+    password: "123"
+    db: "oms"
+    max_open_connections: 100
+    max_idle_connections: 10
+    conn_max_lifetime: "1h"
+    debug_mode: true
+    prepare_stmt: true
+    skip_default_transaction: false
+
+  slaves:
+    count: 2
+    
+    slave_1:
+      host: "localhost"
+      port: "5433"  
+      user: "postgres"
+      password: "123"
+      db: "oms"
+      max_open_connections: 50
+      max_idle_connections: 5
+      conn_max_lifetime: "1h"
+      debug_mode: false
+      prepare_stmt: true
+      skip_default_transaction: false
+
+    slave_2:
+      host: "localhost"
+      port: "5434"  
+      user: "postgres"
+      password: "123"
+      db: "oms"
+      max_open_connections: 50
+      max_idle_connections: 5
+      conn_max_lifetime: "1h"
+      debug_mode: false
+      prepare_stmt: true
+      skip_default_transaction: false
