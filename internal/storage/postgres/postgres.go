@@ -17,7 +17,7 @@ func NewPostgres(ctx context.Context) *Postgres {
 	dbConfig := config.Database
 	slavesConfig := config.Slaves
 
-	log.Info("Loading PostgreSQL configuration",
+	log.Info("loading PostgreSQL configuration",
 		"host", dbConfig.Host,
 		"port", dbConfig.Port,
 		"user", dbConfig.Username,
@@ -38,7 +38,7 @@ func NewPostgres(ctx context.Context) *Postgres {
 		SkipDefaultTransaction: dbConfig.SkipDefaultTransaction,
 	}
 
-	// 2 slaves (len-2)
+	// 2 slaves (capacity-2)
 	slaves := make([]postgres.DBConfig, 0, len(slavesConfig))
     for i, slaveConfig := range slavesConfig {
         slaveDBConfig := postgres.DBConfig{
@@ -64,7 +64,7 @@ func NewPostgres(ctx context.Context) *Postgres {
         )
     }
 
-	//fmt.Printf("Type of myInt: %T\n", masterConfig.Port)
+	//fmt.Printf("Type of port: %T\n", masterConfig.Port)
 	//fmt.Printf("configs of master %v", masterConfig)
 
 

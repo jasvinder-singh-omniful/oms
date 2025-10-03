@@ -21,8 +21,7 @@ func main() {
 
 	err := config.Init(ctx)
 	if err != nil {
-		println(fmt.Errorf("error when initializing the config %s", err.Error()))
-		log.Error("config initialization error", err.Error())
+		panic(fmt.Errorf("failed to initialize configuration: %w", err))
 	}
 
 	// initializing the logger
