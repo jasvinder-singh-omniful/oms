@@ -15,14 +15,14 @@ type UserRepo struct {
 }
 
 
-func NewUserRepo(ctx context.Context, db *Postgres) *UserRepo {
+func NewUserRepo(db *Postgres) *UserRepo {
 	return &UserRepo{
 		DB: db,
 	}
 }
 
-func (r *UserRepo) CreateUser(ctx context.Context, user *types.User) (*types.User, error) {
-	logTag := "[UserRepo][CreateUser]"
+func (r *UserRepo) Create(ctx context.Context, user *types.User) (*types.User, error) {
+	logTag := "[UserRepo][Create]"
 	log.InfofWithContext(ctx, logTag+" Creating user", "email", user.Email)
 
 	db := r.DB.Cluster.GetMasterDB(ctx)
@@ -37,8 +37,8 @@ func (r *UserRepo) CreateUser(ctx context.Context, user *types.User) (*types.Use
 }
 
 
-func (r *UserRepo) GetUserByEmail(ctx context.Context, email string) (*types.User, error) {
-	logTag := "[UserRepo][GetUserByEmail]"
+func (r *UserRepo) SearchByMail(ctx context.Context, email string) (*types.User, error) {
+	logTag := "[UserRepo][SearchByMail]"
 	log.InfofWithContext(ctx, logTag+" getting user by email", "email ", email)
 
 	db := r.DB.Cluster.GetSlaveDB(ctx)
@@ -48,7 +48,7 @@ func (r *UserRepo) GetUserByEmail(ctx context.Context, email string) (*types.Use
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
             log.WarnfWithContext(ctx, logTag+" user not found", "email", email)
-            return nil, nil
+            return nil, fmt.Errorf("user not found")
         }
 		log.ErrorfWithContext(ctx, logTag+" error when getting user by email", err)
 		return nil, err
@@ -57,8 +57,8 @@ func (r *UserRepo) GetUserByEmail(ctx context.Context, email string) (*types.Use
 	return &user, nil
 }
 
-func (r *UserRepo) GetUserById(ctx context.Context, id int64) (*types.User, error) {
-	logTag := "[UserRepo][GetUserById]"
+func (r *UserRepo) SearchByID(ctx context.Context, id int64) (*types.User, error) {
+	logTag := "[UserRepo][SearchByID]"
 	log.InfofWithContext(ctx, logTag+" getting user by id", "id", id)
 
 	db := r.DB.Cluster.GetSlaveDB(ctx)
@@ -67,8 +67,8 @@ func (r *UserRepo) GetUserById(ctx context.Context, id int64) (*types.User, erro
 	err := db.Where("id = ? AND is_active = ?", id, true).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-            log.WarnfWithContext(ctx, logTag+" User not found", "id", id)
-            return nil, nil
+            log.WarnfWithContext(ctx, logTag+" user not found", "id", id)
+            return nil, fmt.Errorf("user not found with id %d", id)
         }
 		log.ErrorfWithContext(ctx, logTag+" error when getting user by id", err)
 		return nil, err
@@ -77,22 +77,22 @@ func (r *UserRepo) GetUserById(ctx context.Context, id int64) (*types.User, erro
 	return &user, nil
 }
 
-func (r *UserRepo) UpdateUser(ctx context.Context, user *types.User) (*types.User, error) {
-	logTag := "[UserRepo][UpdateUser]"
+func (r *UserRepo) Update(ctx context.Context, user *types.User) (*types.User, error) {
+	logTag := "[UserRepo][Update]"
 	log.InfofWithContext(ctx, logTag+" updating user", "id", user.ID)
 
 	db := r.DB.Cluster.GetMasterDB(ctx)
 
 	if err := db.Save(user).Error; err != nil {
 		log.ErrorfWithContext(ctx, logTag+" failed to update user", err, "id", user.ID)
-		return nil, err
+		return nil, fmt.Errorf("error when updating user %v", err)
 	}
 
 	log.InfofWithContext(ctx, logTag+" user updated successfully", "id", user.ID)
 	return user, nil
 }
 
-func (r *UserRepo) DeleteUserById(ctx context.Context, id int64) error {
+func (r *UserRepo) Delete(ctx context.Context, id int64) error {
 	logTag := "[UserRepo][DeleteUser]"
 	log.InfofWithContext(ctx, logTag+" deleting user", "id", id)
 

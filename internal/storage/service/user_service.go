@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/omniful/go_commons/log"
@@ -35,7 +34,7 @@ func (s *UserService) CreateUser(ctx context.Context, name string, email string,
 		UpdatedAt:    time.Now(),
 	}
 
-	createdUser, err := s.UserRepo.CreateUser(ctx, user)
+	createdUser, err := s.UserRepo.Create(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -47,16 +46,11 @@ func (s *UserService) GetUserByEmail(ctx context.Context, email string) (*types.
 	logTag := "[UserService][GetUserByEmail]"
 	log.InfofWithContext(ctx, logTag+" getting user by email", " email ", email)
 
-	user, err := s.UserRepo.GetUserByEmail(ctx, email)
+	user, err := s.UserRepo.SearchByMail(ctx, email)
 
 	if err != nil {
 		log.ErrorfWithContext(ctx, logTag+" error when getting user bt email", email)
-		return &types.User{}, nil
-	}
-
-	if user == nil {
-		log.WarnfWithContext(ctx, logTag+" user not found", "email", email)
-		return nil, nil
+		return nil, err
 	}
 
 	return user, nil
@@ -66,17 +60,11 @@ func (s *UserService) GetUserById(ctx context.Context, id int64) (*types.User, e
 	logTag := "[UserService][GetUserById]"
 	log.InfofWithContext(ctx, logTag+" getting user by email", " email ", id)
 
-	user, err := s.UserRepo.GetUserById(ctx, id)
+	user, err := s.UserRepo.SearchByID(ctx, id)
 
 	if err != nil {
 		log.ErrorfWithContext(ctx, logTag+" error when getting user bt id", id)
-		return &types.User{}, nil
-	}
-
-
-	if user == nil {
-		log.WarnfWithContext(ctx, logTag+" user not found", "id", id)
-		return nil, nil
+		return nil, err
 	}
 
 	return user, nil
@@ -96,14 +84,14 @@ func (s *UserService) UpdateUser(ctx context.Context, id int64, name string, ema
 		}
 	}
 
-	existingUser, err := s.UserRepo.GetUserById(ctx, id)
+	existingUser, err := s.UserRepo.SearchByID(ctx, id)
 	if err != nil {
 		log.ErrorfWithContext(ctx, logTag+" failed to fetch existing user", err)
 		return nil, err
 	}
 	if existingUser == nil {
 		log.WarnfWithContext(ctx, logTag+" user not found", "id", id)
-		return nil, fmt.Errorf("user not found")
+		return nil, err
 	}
 
 	if name != "" {
@@ -119,7 +107,7 @@ func (s *UserService) UpdateUser(ctx context.Context, id int64, name string, ema
 		existingUser.PasswordHash = hashedPassword
 	}
 
-	updatedUser, err := s.UserRepo.UpdateUser(ctx, existingUser)
+	updatedUser, err := s.UserRepo.Update(ctx, existingUser)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +121,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id int64) error {
 	log.InfofWithContext(ctx, logTag+" deleting user", "user_id", id)
 
 
-	err := s.UserRepo.DeleteUserById(ctx, id)
+	err := s.UserRepo.Delete(ctx, id)
 
 	if err != nil {
 		log.ErrorfWithContext(ctx, logTag+" error when deleting user", err, "user_id", id)

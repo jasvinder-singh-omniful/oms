@@ -7,13 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/omniful/go_commons/http"
 	"github.com/omniful/go_commons/log"
+	"github.com/si/internal/config"
+	"github.com/si/internal/http/handlers"
+	"github.com/si/internal/setup"
 	"github.com/si/internal/storage/postgres"
 	"github.com/si/internal/storage/service"
 	"github.com/si/internal/types"
-	user_handler "github.com/si/internal/http/handlers/user_handler"
-	"github.com/si/internal/config"
 	//"github.com/si/internal/utils/response"
 )
+
 
 func main() {
 	// initialize all the configs
@@ -52,13 +54,16 @@ func main() {
 	log.Info("database initialization done")
 
 	// repos
-	userRepo := postgres.NewUserRepo(ctx, cluster)
+	userRepo := postgres.NewUserRepo(cluster)
+	productRepo := postgres.NewProductRepo(cluster)
 
 	// services
 	userService := service.NewUserService(userRepo)
+	productService := service.NewProductService(productRepo)
 
 	// handlers
-	userHandler := user_handler.NewUserHandler(userService)
+	userHandler := handlers.NewUserHandler(userService)
+	producthandler := handlers.NewProductHandler(productService)
 
 
 	server := http.InitializeServer(
@@ -73,11 +78,7 @@ func main() {
 	})
 
 
-	server.POST("/users", userHandler.CreateUserHandler)
-	server.POST("/users/email", userHandler.GetUserByEmailHandler)
-	server.POST("/users/id", userHandler.GetUserByIdHandler)
-	server.PUT("/users", userHandler.UpdateUserHandler)
-	server.DELETE("/users", userHandler.DeleteUserHandler)
+	setup.SetupRoutes(server, userHandler, producthandler)
 
 	log.Info("server starting on port 3000")
 	if err := server.StartServer("oms-service"); err != nil {
