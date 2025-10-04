@@ -10,7 +10,7 @@ import (
 	"github.com/si/internal/storage/postgres"
 	"github.com/si/internal/storage/service"
 	"github.com/si/internal/types"
-	user_handler "github.com/si/internal/http/handlers/users"
+	user_handler "github.com/si/internal/http/handlers/user_handler"
 	"github.com/si/internal/config"
 	//"github.com/si/internal/utils/response"
 )
@@ -73,7 +73,11 @@ func main() {
 	})
 
 
-	server.POST("/users", userHandler.CreateUser)
+	server.POST("/users", userHandler.CreateUserHandler)
+	server.POST("/users/email", userHandler.GetUserByEmailHandler)
+	server.POST("/users/id", userHandler.GetUserByIdHandler)
+	server.PUT("/users", userHandler.UpdateUserHandler)
+	server.DELETE("/users", userHandler.DeleteUserHandler)
 
 	log.Info("server starting on port 3000")
 	if err := server.StartServer("oms-service"); err != nil {

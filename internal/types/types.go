@@ -2,46 +2,42 @@ package types
 
 import (
 	"time"
-
-	"github.com/omniful/go_commons/http"
 )
 
 type ErrorResponse struct {
-	Message string        `json:"message"`
 	Details []interface{} `json:"details,omitempty"`
 }
 
 type APIResponse struct {
-	Headers http.ResponseParams `json:"headers,omitempty"`
-	Message string              `json:"message"`
-	Data    interface{}         `json:"data,omitempty"`
-	Error   *ErrorResponse      `json:"error,omitempty"`
+	Message string         `json:"message"`
+	Data    interface{}    `json:"data,omitempty"`
+	Error   *ErrorResponse `json:"error,omitempty"`
 }
 
 type User struct {
-	ID int64 `json:"id" db:"id"`
+	ID int64 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
 
-	Name         string `json:"name" db:"name"`
-	Email        string `json:"email" db:"email"`
-	Phone        string `json:"phone" db:"phone"`
-	PasswordHash string `json:"-" db:"password_hash"`
-	IsActive     bool   `json:"is_active" db:"is_active"`
+	Name         string `json:"name" gorm:"column:name;not null"`
+	Email        string `json:"email" gorm:"column:email;unique;not null"`
+	Phone        string `json:"phone" gorm:"column:phone;unique"`
+	PasswordHash string `json:"-" gorm:"column:password_hash;not null"`
+	IsActive     bool   `json:"is_active" gorm:"column:is_active;default:true"`
 
-	CreatedAt time.Time `json:"created_at,omitempty" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty" db:"updated_at"`
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at,omitempty" gorm:"column:updated_at;autoUpdateTime"`
 }
 
 type Product struct {
-	ID int64 `json:"id" db:"id"`
+	ID int64 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
 
-	Name          string  `json:"name" db:"name"`
-	SKU           string  `json:"sku" db:"sku"`
-	Price         float64 `json:"price" db:"price"`
-	Category      string  `json:"category" db:"category"`
-	StockQuantity int64   `json:"stock_quantity" db:"stock_quantity"`
+	Name          string  `json:"name" gorm:"column:name;not null"`
+	SKU           string  `json:"sku" gorm:"column:sku;unique;not null"`
+	Price         float64 `json:"price" gorm:"column:price;not null"`
+	Category      string  `json:"category" gorm:"column:category"`
+	StockQuantity int64   `json:"stock_quantity" gorm:"column:stock_quantity;default:0"`
 
-	CreatedAt time.Time `json:"created_at,omitempty" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty" db:"updated_at"`
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at,omitempty" gorm:"column:updated_at;autoUpdateTime"`
 }
 
 // enum type OrderStatus
@@ -55,21 +51,21 @@ const (
 )
 
 type Order struct {
-	ID          int64       `json:"id" db:"id"`
-	UserID      int64       `json:"user_id" db:"user_id"`
-	Status      OrderStatus `json:"status" db:"status"`
-	TotalAmount float64     `json:"total_amount" db:"total_amount"`
+	ID          int64       `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	UserID      int64       `json:"user_id" gorm:"column:user_id;not null;index"`
+	Status      OrderStatus `json:"status" gorm:"column:status;type:order_status;default:'order.pending'"`
+	TotalAmount float64     `json:"total_amount" gorm:"column:total_amount;not null;default:0"`
 
-	CreatedAt time.Time `json:"created_at,omitempty" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty" db:"updated_at"`
+	CreatedAt time.Time `json:"created_at,omitempty" gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at,omitempty" gorm:"column:updated_at;autoUpdateTime"`
 }
 
 type OrderItem struct {
-	ID        int64 `json:"id" db:"id"`
-	OrderID   int64 `json:"order_id" db:"order_id"`
-	ProductID int64 `json:"product_id" db:"product_id"`
+	ID        int64 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	OrderID   int64 `json:"order_id" gorm:"column:order_id;not null;index"`
+	ProductID int64 `json:"product_id" gorm:"column:product_id;not null;index"`
 
-	Name     string  `json:"name" db:"name"`
-	Quantity int32   `json:"quantity" db:"quantity"`
-	Price    float64 `json:"price" db:"price"`
+	Name     string  `json:"name" gorm:"column:name;not null"`
+	Quantity int32   `json:"quantity" gorm:"column:quantity;not null"`
+	Price    float64 `json:"price" gorm:"column:price;not null"`
 }

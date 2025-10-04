@@ -13,6 +13,7 @@ check:
 build:
 	go build -o $(BIN_PATH) $(SRC_PATH)
 
+# migrations commands
 create-migration:
 	migrate create -ext sql -dir migrations -seq create_users_table
 
