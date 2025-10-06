@@ -162,7 +162,7 @@ func (s *ProductService) UpdateInventory(ctx context.Context, id int64, quantity
 
 	updatedProduct, err := s.ProductRepo.Update(ctx, existingProduct)
 	if err != nil {
-		 log.ErrorfWithContext(ctx, logTag+" error when updating inventory", err)
+		log.ErrorfWithContext(ctx, logTag+" error when updating inventory", err)
         return nil, fmt.Errorf("failed to update inventory %w", err)
 	}
 

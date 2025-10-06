@@ -56,15 +56,17 @@ func main() {
 	// repos
 	userRepo := postgres.NewUserRepo(cluster)
 	productRepo := postgres.NewProductRepo(cluster)
+	orderRepo := postgres.NewOrderRepo(cluster)
 
 	// services
 	userService := service.NewUserService(userRepo)
 	productService := service.NewProductService(productRepo)
+	orderService := service.NewOrderService(orderRepo, userRepo, productRepo)
 
 	// handlers
 	userHandler := handlers.NewUserHandler(userService)
 	producthandler := handlers.NewProductHandler(productService)
-
+	orderHandler := handlers.NewOrderHandler(orderService)
 
 	server := http.InitializeServer(
 		":3000", 0, 0, 0, true,
@@ -78,7 +80,7 @@ func main() {
 	})
 
 
-	setup.SetupRoutes(server, userHandler, producthandler)
+	setup.SetupRoutes(server, userHandler, producthandler, orderHandler)
 
 	log.Info("server starting on port 3000")
 	if err := server.StartServer("oms-service"); err != nil {

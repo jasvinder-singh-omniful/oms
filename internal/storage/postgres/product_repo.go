@@ -127,6 +127,47 @@ func (r *ProductRepo) Update(ctx context.Context, prod *types.Product) (*types.P
 	return prod, nil
 }
 
+func (r *ProductRepo) UpdateStock(tx *gorm.DB, ctx context.Context, id int64, quantity int64, operation string) error{
+	logTag := "[ProductRepo][UpdateStock]"
+    log.InfofWithContext(ctx, logTag+" updating stock", "product_id", id, "quantity", quantity, "operation", operation)
+
+
+	var product types.Product
+	if err := tx.Where("id = ?", id).First(&product).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			log.WarnfWithContext(ctx, logTag+" product not found", "product_id", id)
+            return fmt.Errorf("product not found")
+        }
+        log.ErrorfWithContext(ctx, logTag+" failed to fetch product", err, "product_id", id)
+        return fmt.Errorf("failed to fetch product %w", err)
+    }
+
+	switch operation{
+	case "set":
+		product.StockQuantity = quantity
+	case "add":
+		product.StockQuantity += quantity
+	case "subtract":
+		if product.StockQuantity < quantity {
+			return fmt.Errorf("insufficient stock")
+		}
+		product.StockQuantity -= quantity
+	default:
+		return fmt.Errorf("invalid operation: %s", operation)
+	}
+
+	product.UpdatedAt = time.Now()
+
+    if err := tx.Save(&product).Error; err != nil {
+        log.ErrorfWithContext(ctx, logTag+" failed to update stock", err, "product_id", id)
+        return fmt.Errorf("failed to update stock %w", err)
+    }
+
+    log.InfofWithContext(ctx, logTag+" stock updated successfully", "product_id", id, "new_stock", product.StockQuantity)
+    return nil
+
+}
+
 func (r *ProductRepo) Delete(ctx context.Context, id int64) error {
 	logTag := "[ProductRepo][Delete]"
 	log.InfofWithContext(ctx, logTag+" deleting product", "id", id)

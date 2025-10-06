@@ -14,6 +14,29 @@ type APIResponse struct {
 	Error   *ErrorResponse `json:"error,omitempty"`
 }
 
+type OrderItemRequest struct {
+    ProductID int64 `json:"product_id"`
+    Quantity  int32 `json:"quantity"`
+}
+
+type OrderWithDetails struct {
+	Order Order `json:"order,omitempty"`
+	Items []OrderItem `json:"items,omitempty"`
+	User *User	`json:"user,omitempty"`
+}
+
+type OrderSearchParams struct {
+    UserID       int64       `json:"user_id"`
+    OrderID      int64       `json:"order_id"`
+    CustomerName string      `json:"customer_name"`
+    ItemName     string      `json:"item_name"`
+    Status       OrderStatus `json:"status"`
+    Limit        int         `json:"limit"`
+    Offset       int         `json:"offset"`
+}
+
+
+//database related types 
 type User struct {
 	ID int64 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
 

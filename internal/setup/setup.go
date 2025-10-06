@@ -5,10 +5,10 @@ import (
 	"github.com/si/internal/http/handlers"
 )
 
-func SetupRoutes(server *http.Server, userHandler *handlers.UserHandler, productHandler *handlers.ProductHandler) {
+func SetupRoutes(server *http.Server, userHandler *handlers.UserHandler, productHandler *handlers.ProductHandler, orderHandler *handlers.OrderHandler) {
     v1 := server.Group("/api/v1")
     {
-        // user routes
+        //user routes
         userRoutes := v1.Group("/users")
         {
 			userRoutes.POST("", userHandler.CreateUserHandler)
@@ -18,7 +18,7 @@ func SetupRoutes(server *http.Server, userHandler *handlers.UserHandler, product
 			userRoutes.DELETE("", userHandler.DeleteUserHandler)
         }
 
-        // product routes
+        //product routes
         productRoutes := v1.Group("/products")
         {
             productRoutes.POST("", productHandler.CreateProductHandler)
@@ -28,6 +28,19 @@ func SetupRoutes(server *http.Server, userHandler *handlers.UserHandler, product
             productRoutes.PUT("/:id", productHandler.UpdateProductHandler)
             productRoutes.DELETE("/:id", productHandler.DeleteProductHandler)
             productRoutes.PATCH("/:id/inventory", productHandler.UpdateInventoryHandler)
+        }
+
+        //order routes
+        orderRoutes := v1.Group("/orders")
+        {
+            orderRoutes.POST("", orderHandler.CreateOrderHandler)
+            orderRoutes.GET("/:id", orderHandler.GetOrderByIdHandler)
+            orderRoutes.POST("/search", orderHandler.SearchOrdersHandler)
+            orderRoutes.PATCH("/:id/status", orderHandler.UpdateOrderStatusHandler)
+            
+            orderRoutes.POST("/:id/items", orderHandler.AddOrderItemHandler)
+            orderRoutes.PUT("/:id/items/:item_id", orderHandler.UpdateOrderItemHandler)
+            orderRoutes.DELETE("/:id/items/:item_id", orderHandler.RemoveOrderItemHandler)
         }
     }
 }
